@@ -6,6 +6,7 @@ import CreateCabinForm from "./CreateCabinForm";
 import { useDeleteCabin } from "./useDeleteCabin";
 import { useCreateCabin } from "./useCreateCabin";
 import Modal from "../../ui/Modal";
+import ConfirmDelete from "../../ui/ConfirmDelete";
 
 const TableRow = styled.div`
   display: grid;
@@ -88,17 +89,23 @@ function CabinRow({ cabin }) {
           <Modal.Window name="edit">
             <CreateCabinForm cabinEdit={cabin} />
           </Modal.Window>
-          <button
-            onClick={() =>
-              deleteCabin(cabinId, {
-                onSuccess: () =>
-                  toast.success(`Cabin ${name} successfully deleted`),
-              })
-            }
-            disabled={isDeleting}
-          >
-            <HiTrash />
-          </button>
+          <Modal.Open opens="delete">
+            <button disabled={isDeleting}>
+              <HiTrash />
+            </button>
+          </Modal.Open>
+          <Modal.Window name="delete">
+            <ConfirmDelete
+              resourceName="cabin"
+              disabled={isDeleting}
+              onConfirm={() =>
+                deleteCabin(cabinId, {
+                  onSuccess: () =>
+                    toast.success(`Cabin ${name} successfully deleted`),
+                })
+              }
+            />
+          </Modal.Window>
         </Modal>
       </div>
     </TableRow>
