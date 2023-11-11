@@ -4,11 +4,14 @@ import { useCabins } from "./useCabins";
 import Table from "../../ui/Table";
 import Menus from "../../ui/Menus";
 import { useSearchParams } from "react-router-dom";
+import Empty from "../../ui/Empty";
 
 function CabinTable() {
   const { isLoading, cabins } = useCabins();
   const [searchParams] = useSearchParams();
   if (isLoading) return <Spinner />;
+  if (!cabins.length) return <Empty resourceName="cabins" />;
+  //Filter
   const filterValue = searchParams.get("discount") || "all";
   let filteredValue;
   if (filterValue === "all") filteredValue = cabins;
@@ -16,7 +19,14 @@ function CabinTable() {
     filteredValue = cabins.filter((cabin) => cabin.discount === 0);
   if (filterValue === "with-discount")
     filteredValue = cabins.filter((cabin) => cabin.discount !== 0);
-  console.log(filterValue);
+  //SORt
+  const sortBy = searchParams.get("sortBy") || "startDate-asc";
+  const [field, direction] = sortBy.split("-");
+  const modifier = direction === "asc" ? 1 : -1;
+  const sortedCabins = filteredValue.sort(
+    (a, b) => (a[field] - b[field]) * modifier
+  );
+
   return (
     <Menus>
       <Table columns="0.6fr 1.8fr 2.2fr 1fr 1fr 1fr">
@@ -29,7 +39,7 @@ function CabinTable() {
           <div></div>
         </Table.Header>
         <Table.Body
-          data={filteredValue}
+          data={sortedCabins}
           render={(el) => <CabinRow cabin={el} key={el.id} />}
         />
       </Table>
